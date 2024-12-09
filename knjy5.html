@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فعاليات كنجي</title>
+  <style>
+    /* General Styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-image: url('https://images2.alphacoders.com/833/833315.jpg'); /* Your Wallpaper */
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    /* Background Blur and Overlay */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      filter: blur(8px);
+      z-index: -1;
+    }
+
+    /* Title Styling */
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Leaderboard */
+    #player-list-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      border-radius: 10px;
+      color: white;
+      text-align: right;
+      width: 250px;
+    }
+
+    #player-list-container ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #subtitle {
+      position: absolute;
+      top: 110px;
+      left: 10px;
+      font-size: 1.2em;
+      color: white;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    .player-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+
+    .status-online {
+      background: green;
+    }
+
+    .status-offline {
+      background: gray;
+    }
+
+    /* Logo */
+    #logo-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    #logo-container img {
+      width: 80px;
+      height: auto;
+    }
+
+    /* Buzzer */
+    .buzzer {
+      width: 120px;
+      height: 120px;
+      margin: 20px auto;
+      border-radius: 50%;
+      border: 2px solid black;
+      background-color: red;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .buzzer.green {
+      background-color: green;
+      box-shadow: 0px 0px 15px green;
+    }
+
+    .buzzer.gray {
+      background-color: gray;
+      box-shadow: 0px 0px 15px gray;
+      cursor: not-allowed;
+    }
+
+    /* Inputs and Buttons */
+    input, button {
+      font-size: 1.2em;
+      padding: 10px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      color: white;
+    }
+
+    #nickname {
+      width: 250px;
+      background-color: white;
+      color: black;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #4CAF50;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
+
+    /* Social Media */
+    #social-media {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>فعاليات كنجي</h1>
+
+  <!-- Player List -->
+  <div id="player-list-container">
+    <h3>قائد اللعبة:</h3>
+    <ul id="leader-name">
+      <li><span id="leader-status" class="status-indicator status-offline"></span><span>لا يوجد قائد بعد</span></li>
+    </ul>
+    <h3>اللاعبين:</h3>
+    <ul id="player-list"></ul>
+  </div>
+
+  <!-- Subtitle -->
+  <div id="subtitle"></div>
+
+  <!-- Logo -->
+  <div id="logo-container">
+    <img src="https://i.ibb.co/3pGDxPk/logo.png" alt="Logo">
+  </div>
+
+  <!-- Role Selection -->
+  <div id="role-selection">
+    <input type="text" id="nickname" placeholder="اكتب اسمك هنا">
+    <button id="become-leader">أصبح القائد</button>
+    <button id="join-player">انضم كلاعب</button>
+  </div>
+
+  <!-- Leader Controls -->
+  <div id="leader-area" style="display: none;">
+    <button id="start-game">إبدا اللعبة</button>
+    <button id="reset-buzzer">إعادة ضبط الزر</button>
+    <button id="reset-game">إعادة ضبط اللعبة بالكامل</button>
+    <input type="text" id="leader-subtitle" placeholder="إضافة عنوان فرعي" />
+  </div>
+
+  <!-- Player Area -->
+  <div id="player-area" style="display: none;">
+    <div class="buzzer" id="player-buzzer">زر اللاعب</div>
+  </div>
+
+  <!-- Result -->
+  <div id="result">بانتظار اختيار الأدوار...</div>
+
+  <!-- Social Media -->
+  <div id="social-media">
+    Instagram: kn_njy | Twitter: iknjyi | YouTube: KNJY | TikTok: iknjyi | Snapchat: knjy0
+  </div>
+
+  <script>
+    let isLeader = false;
+    let isClicked = false;
+    let firstClicker = null;
+    let players = [];
+    let nickname = '';
+    const nicknameInput = document.getElementById('nickname');
+    const becomeLeaderButton = document.getElementById('become-leader');
+    const joinPlayerButton = document.getElementById('join-player');
+    const startGameButton = document.getElementById('start-game');
+    const resetBuzzerButton = document.getElementById('reset-buzzer');
+    const resetGameButton = document.getElementById('reset-game');
+    const playerBuzzer = document.getElementById('player-buzzer');
+    const resultDiv = document.getElementById('result');
+    const leaderArea = document.getElementById('leader-area');
+    const playerArea = document.getElementById('player-area');
+    const playerList = document.getElementById('player-list');
+    const leaderName = document.getElementById('leader-name');
+    const leaderStatus = document.getElementById('leader-status');
+    const subtitleDiv = document.getElementById('subtitle');
+    const leaderSubtitle = document.getElementById('leader-subtitle');
+
+    // Become Leader
+    becomeLeaderButton.addEventListener('click', () => {
+      if (isLeader) {
+        alert('هناك قائد بالفعل!');
+        return;
+      }
+      nickname = nicknameInput.value.trim();
+      if (!nickname) {
+        alert('من فضلك اكتب اسمك.');
+        return;
+      }
+      isLeader = true;
+      becomeLeaderButton.disabled = true;
+      joinPlayerButton.disabled = true;
+      nicknameInput.disabled = true;
+      leaderArea.style.display = 'block';
+      leaderStatus.classList.remove('status-offline');
+      leaderStatus.classList.add('status-online');
+      leaderName.innerHTML = `<li><span class="status-indicator status-online"></span>${nickname}</li>`;
+      resultDiv.textContent = `القائد: ${nickname}`;
+    });
+
+    // Join as Player
+    joinPlayerButton.addEventListener('click', () => {
+      if (players.length >= 3) {
+        alert('تم اكتمال اللاعبين!');
+        return;
+      }
+      nickname = nicknameInput.value.trim();
+      if (!nickname) {
+        alert('من فضلك اكتب اسمك.');
+        return;
+      }
+      if (players.includes(nickname)) {
+        alert('تم اختيار هذا الاسم مسبقاً.');
+        return;
+      }
+      players.push(nickname);
+      playerList.innerHTML += `<li><span class="status-indicator status-online"></span>${nickname}</li>`;
+      joinPlayerButton.disabled = true;
+      nicknameInput.disabled = true;
+      playerArea.style.display = 'block';
+      resultDiv.textContent = `${nickname} انضم كلاعب!`;
+    });
+
+    // Start Game
+    startGameButton.addEventListener('click', () => {
+      document.getElementById('role-selection').style.display = 'none';
+      startGameButton.textContent = 'إنهاء اللعبة';
+      resultDiv.textContent = 'اللعبة قد بدأت!';
+    });
+
+    // Add Subtitle
+    leaderSubtitle.addEventListener('input', () => {
+      subtitleDiv.textContent = leaderSubtitle.value;
+    });
+
+    // Player Buzzer Click
+    playerBuzzer.addEventListener('click', () => {
+      if (!isClicked) {
+        isClicked = true;
+        firstClicker = nickname;
+        playerBuzzer.textContent = `${nickname} ضغط الزر`;
+        playerBuzzer.classList.add('green');
+        resultDiv.textContent = `${nickname} ضغط الزر أولاً!`;
+      } else {
+        playerBuzzer.classList.add('gray');
+        resultDiv.textContent = 'بإنتظار إعادة ضبط الزر من طرف قائد اللعبة';
+      }
+    });
+
+    // Reset Buzzer
+    resetBuzzerButton.addEventListener('click', () => {
+      if (!isLeader) {
+        alert('فقط القائد يستطيع إعادة ضبط الزر.');
+        return;
+      }
+      isClicked = false;
+      playerBuzzer.textContent = 'زر اللاعب';
+      playerBuzzer.classList.remove('green', 'gray');
+      resultDiv.textContent = 'تمت إعادة ضبط الزر.';
+    });
+
+    // Reset Game
+    resetGameButton.addEventListener('click', () => {
+      location.reload();
+    });
+  </script>
+</body>
+</html>
